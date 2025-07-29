@@ -43,7 +43,7 @@ class FamilyAdmin(User):
 
 class SuperAdmin(User):
     def __init__(self):
-        super().__init__("root", bcrypt.hashpw(b"supersecure", bcrypt.gensalt()), phone=None)
+        super().__init__("Violet", bcrypt.hashpw(b"123456", bcrypt.gensalt()), phone=None)
         self.is_super_admin = True
 
     def __repr__(self):
@@ -138,7 +138,7 @@ def register_user(username, raw_password, phone, as_admin=False, super_admin=Non
 # 修改登录函数，支持用手机号登录 - 新增参数 login_by_phone
 def login(account, password, login_by_phone=False):
     # 超级管理员只支持用户名登录
-    if not login_by_phone and account == 'root':
+    if not login_by_phone and account == 'Violet':
         root = SuperAdmin()
         if bcrypt.checkpw(password.encode(), root.password_hash):
             print("登录成功：超级管理员")
