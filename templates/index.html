@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>智能家居系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>欢迎来到智能家居控制系统</h1>
+    <div class="container">
+        <a href="{{ url_for('login_user') }}"><button>登录</button></a>
+        <a href="{{ url_for('register') }}"><button>注册</button></a>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

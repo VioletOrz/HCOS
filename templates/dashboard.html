@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>HcOS 控制面板</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* 用户表格 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            border-bottom: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        table th {
+            background-color: #f7f7f7;
+        }
+
+        /* 模态弹窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            width: 320px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .modal-content button {
+            margin: 10px;
+        }
+    </style>
+    <script>
+        // 切换选项卡
+        function showSection(section) {
+            document.getElementById('appliance-section').style.display = (section === 'appliance') ? 'block' : 'none';
+            document.getElementById('user-section').style.display = (section === 'user') ? 'block' : 'none';
+
+            document.getElementById('appliance-tab').classList.remove('active');
+            document.getElementById('user-tab').classList.remove('active');
+            document.getElementById(section + '-tab').classList.add('active');
+        }
+
+        // 弹窗逻辑
+        let currentActionForm = null;
+        function openModal(formId) {
+            currentActionForm = document.getElementById(formId);
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+
+        function confirmAction() {
+            if (currentActionForm) {
+                currentActionForm.submit();
+            }
+            closeModal();
+        }
+    </script>
+</head>
+<body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+      <div class="flash-message {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <div class="container">
+        <div class="sidebar">
+            <a href="javascript:void(0);" id="appliance-tab" class="active" onclick="showSection('appliance')">HcOS 控制中心</a>
+            {% if current_user.is_family_admin or current_user.is_super_admin %}
+            <a href="javascript:void(0);" id="user-tab" onclick="showSection('user')">用户管理</a>
+            {% endif %}
+        </div>
+
+        <div class="main-content">
+
+            <!-- 家电控制区 -->
+            <div id="appliance-section">
+                <h1>HcOS 控制中心</h1>
+                {% for appliance in appliances %}
+                <div class="card">
+                    {% if appliance.device_id.startswith("light") %}
+                    <img src="{{ url_for('static', filename='images/light.png') }}" alt="灯光">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='images/washer.png') }}" alt="洗衣机">
+                    {% endif %}
+                    <h3>{{ appliance.name }}</h3>
+                    <form method="POST" action="{{ url_for('control_appliance', device_id=appliance.device_id) }}">
+                        <button name="action" value="turn_on">开启</button>
+                        <button name="action" value="turn_off">关闭</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- 用户管理区 -->
+            <div id="user-section" style="display: none;">
+                <h1>用户管理</h1>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>用户名</th>
+                            <th>手机号</th>
+                            <th>角色</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        {% if current_user.is_super_admin or (current_user.is_family_admin and not user.is_super_admin) %}
+                        <tr>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.phone if user.phone else '-' }}</td>
+                            <td>
+                                {% if user.is_super_admin %} 超级管理员
+                                {% elif user.is_family_admin %} 家庭管理员
+                                {% else %} 普通用户
+                                {% endif %}
+                            </td>
+                            <td>
+                                <!-- 注销 -->
+                                <form method="POST" action="{{ url_for('manage_user', username=user.username) }}" id="delete-{{ user.username }}">
+                                    <input type="hidden" name="action" value="delete">
+                                    <button type="button" onclick="openModal('delete-{{ user.username }}')">注销</button>
+                                </form>
+
+                                {% if current_user.is_super_admin and not user.is_super_admin %}
+                                    {% if user.is_family_admin %}
+                                    <form method="POST" action="{{ url_for('manage_user', username=user.username) }}" id="demote-{{ user.username }}">
+                                        <input type="hidden" name="action" value="demote">
+                                        <button type="button" onclick="openModal('demote-{{ user.username }}')">取消管理员</button>
+                                    </form>
+                                    {% else %}
+                                    <form method="POST" action="{{ url_for('manage_user', username=user.username) }}" id="promote-{{ user.username }}">
+                                        <input type="hidden" name="action" value="promote">
+                                        <button type="button" onclick="openModal('promote-{{ user.username }}')">设为管理员</button>
+                                    </form>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 确认弹窗 -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <h3>确认操作？</h3>
+            <button onclick="confirmAction()">确认</button>
+            <button onclick="closeModal()">取消</button>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

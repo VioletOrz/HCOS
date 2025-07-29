@@ -1,0 +1,94 @@
+body {
+    font-family: 'Microsoft YaHei', sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+}
+
+h1, h2, h3 {
+    color: #333;
+}
+
+.container {
+    display: flex;
+}
+
+.sidebar {
+    width: 220px;
+    background-color: #ffffff;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+    padding: 20px 0;
+    height: 100vh;
+}
+
+.sidebar a {
+    display: block;
+    padding: 12px 20px;
+    color: #555;
+    text-decoration: none;
+    border-radius: 8px;
+    margin: 5px 10px;
+}
+
+.sidebar a.active, .sidebar a:hover {
+    background-color: #3498db;
+    color: white;
+}
+
+.main-content {
+    flex: 1;
+    padding: 30px;
+}
+
+.card {
+    background-color: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px;
+    display: inline-block;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.card img {
+    width: 100px;
+    height: 100px;
+}
+
+button {
+    background-color: #3498db;
+    border: none;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+/* 灵动岛提示 */
+.flash-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    padding: 12px 18px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.6s ease;
+    z-index: 2000;
+}
+
+.flash-message.success { border-left: 5px solid #2ecc71; }
+.flash-message.error { border-left: 5px solid #e74c3c; }
+
+@keyframes fade-in-out {
+    0% { opacity: 0; transform: translateY(-20px);}
+    10% { opacity: 1; transform: translateY(0);}
+    90% { opacity: 1; transform: translateY(0);}
+    100% { opacity: 0; transform: translateY(-20px);}
+}

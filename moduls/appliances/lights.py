@@ -1,4 +1,4 @@
-# ========== appliances/lights.py ==========
+# ========== moduls/appliances/lights.py ==========
 from .base import Appliance, DeviceCategory
 
 class Light(Appliance):

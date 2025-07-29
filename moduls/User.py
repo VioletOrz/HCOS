@@ -1,9 +1,9 @@
+# ======================= moduls/User.py 类定义 ========================
+
 import json
 import os
 import bcrypt
 from cryptography.fernet import Fernet
-
-# ======================= 类定义 ========================
 
 class User:
     """用户类，包含用户名、密码哈希和手机号"""

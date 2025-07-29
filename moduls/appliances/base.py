@@ -1,17 +1,26 @@
 # 文件结构建议（HKFC OS 家电系统）：
 # hkfc_os/
-# ├── appliances/
-# │   ├── __init__.py
-# │   ├── base.py            # 顶层父类 Appliance
-# │   ├── lights.py          # Light 设备功能类
-# │   ├── washers.py         # 洗衣机类
-# │   └── brands/
-# │       ├── __init__.py
-# │       ├── xiaomi.py      # 小米品牌设备
-# │       ├── haier.py       # 海尔品牌设备
-# │       └── ...            # 更多品牌
+# ├── moduls/
+# │   ├── appliances/
+# │   │   ├── __init__.py
+# │   │   ├── base.py            # 顶层父类 Appliance
+# │   │   ├── lights.py          # Light 设备功能类
+# │   │   ├── washers.py         # 洗衣机类
+# │   │   └── brands/
+# │   │       ├── __init__.py
+# │   │       ├── xiaomi.py      # 小米品牌设备
+# │   │       ├── haier.py       # 海尔品牌设备
+# │   │       └── ...            # 更多品牌
+# │
+# └─ static/
+#      ├─ style.css
+#      ├─ js/
+#      │    └─ main.js
+#      └─ images/
+#           ├─ light.png
+#           └─ washer.png
 
-# ========== appliances/base.py ==========
+# ========== moduls/appliances/base.py ==========
 from abc import ABC, abstractmethod
 from enum import Enum
 

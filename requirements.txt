@@ -1,2 +1,4 @@
 # conda create -n HcOS python=3.11
-# pip install bcrypt cryptography
+bcrypt
+cryptography
+flask

@@ -1,5 +1,5 @@
-# ========== appliances/brands/haier.py ==========
-from appliances.washers import WashingMachine
+# ========== moduls/appliances/brands/haier.py ==========
+from moduls.appliances.washers import WashingMachine
 
 class HaierWasher(WashingMachine):
     def start_wash(self, mode: str):

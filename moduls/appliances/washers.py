@@ -1,4 +1,4 @@
-# ========== appliances/washers.py ==========
+# ========== moduls/appliances/washers.py ==========
 from .base import Appliance, DeviceCategory
 
 class WashingMachine(Appliance):

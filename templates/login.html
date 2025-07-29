@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>登录 - HcOS 智能家居</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .login-container {
+            width: 360px;
+            margin: 100px auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 30px;
+            text-align: center;
+        }
+
+        .tab {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .tab button {
+            flex: 1;
+            padding: 10px 0;
+            border-radius: 8px;
+            background: #f0f2f5;
+            color: #333;
+            border: none;
+            cursor: pointer;
+        }
+
+        .tab button.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .login-container input {
+            width: 80%;
+            padding: 10px;
+            margin: 10px auto;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            display: block;
+        }
+    </style>
+    <script>
+        function switchTab(mode) {
+            document.getElementById('mode').value = mode;
+            document.getElementById('user-tab').classList.remove('active');
+            document.getElementById('phone-tab').classList.remove('active');
+            if(mode === 'user') {
+                document.getElementById('user-tab').classList.add('active');
+            } else {
+                document.getElementById('phone-tab').classList.add('active');
+            }
+        }
+    </script>
+</head>
+<body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+      <div class="flash-message {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <div class="login-container">
+        <h2>登录 HcOS</h2>
+        <div class="tab">
+            <button type="button" id="user-tab" class="active" onclick="switchTab('user')">用户名登录</button>
+            <button type="button" id="phone-tab" onclick="switchTab('phone')">手机号登录</button>
+        </div>
+        <form method="POST">
+            <input type="hidden" name="mode" id="mode" value="user">
+            <input type="text" name="account" placeholder="用户名或手机号" required>
+            <input type="password" name="password" placeholder="密码" required>
+            <button type="submit">登录</button>
+        </form>
+        <p>还没有账号？<a href="{{ url_for('register') }}">立即注册</a></p>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

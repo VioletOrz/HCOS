@@ -1,5 +1,5 @@
-# ========== appliances/brands/xiaomi.py ==========
-from appliances.lights import Light
+# ========== moduls/appliances/brands/xiaomi.py ==========
+from moduls.appliances.lights import Light
 
 class XiaomiLight(Light):
     def execute_command(self, command: str):

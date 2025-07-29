@@ -1,4 +1,4 @@
-# ========== main.py 示例使用 ==========
+# ========== moduls/appliances.py 示例使用 ==========
 from appliances.brands.xiaomi import XiaomiLight
 from appliances.brands.haier import HaierWasher
 
