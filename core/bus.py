@@ -1,6 +1,6 @@
 # core/bus.py
 import asyncio, time, logging, uuid
-from typing import Any, Dict
+from typing import Any, Dict, Callable, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +21,7 @@ class InternalBus:
         self._queue = asyncio.PriorityQueue()
         self._running = False
         self._task = None
+        self._counter = 0
 
     # ======================================================
     # 订阅与取消订阅
@@ -37,12 +38,29 @@ class InternalBus:
     # ======================================================
     # 普通发布事件（入队或立即分发）
     # ======================================================
-    async def publish(self, event, immediate: bool = False):
-        logger.info(f"[Bus] publish id={id(self)} topic={event.topic} priority={event.priority}")
+    async def publish(
+        self,
+        event,
+        immediate: bool = False,
+        track: bool = False,
+        on_complete: Optional[Callable] = None,
+    ):
+        logger.info(
+            f"[Bus] publish id={id(self)} topic={event.topic} priority={event.priority} track={track}"
+        )
+
+        completion_fut = None
+        if track:
+            loop = asyncio.get_running_loop()
+            completion_fut = loop.create_future()
+
         if immediate:
-            await self._dispatch_event(event)
+            await self._dispatch_event(event, completion_fut, on_complete)
         else:
-            await self._queue.put((event.priority, event))
+            self._counter += 1
+            await self._queue.put((event.priority, self._counter, event, completion_fut, on_complete))
+
+        return completion_fut
 
     # ======================================================
     # 请求-响应机制
@@ -112,14 +130,14 @@ class InternalBus:
     async def _dispatch_loop(self):
         while self._running:
             try:
-                _, event = await self._queue.get()
-                await self._dispatch_event(event)
+                _, _, event, completion_fut, on_complete = await self._queue.get()
+                await self._dispatch_event(event, completion_fut, on_complete)
             except asyncio.CancelledError:
                 break
             except Exception as e:
                 logger.exception(f"[Bus] dispatch error: {e}")
 
-    async def _dispatch_event(self, event):
+    async def _dispatch_event(self, event, completion_fut=None, on_complete=None):
         handlers = []
         for topic, subs in self._subs.items():
             if topic.endswith("*") and event.topic.startswith(topic[:-1]):
@@ -129,6 +147,7 @@ class InternalBus:
 
         if not handlers:
             logger.debug(f"[Bus] No subscribers for {event.topic}")
+            await self._finalize_event(event, 0, completion_fut, on_complete)
             return
 
         start = time.time()
@@ -139,3 +158,16 @@ class InternalBus:
                 logger.exception(f"[Bus] handler {cb} failed: {e}")
         elapsed = (time.time() - start) * 1000
         logger.info(f"[Bus] event {event.topic} handled by {len(handlers)} subscribers in {elapsed:.2f} ms")
+        await self._finalize_event(event, len(handlers), completion_fut, on_complete)
+
+    async def _finalize_event(self, event, handler_count, completion_fut, on_complete):
+        if on_complete:
+            try:
+                maybe_coro = on_complete(event, handler_count)
+                if asyncio.iscoroutine(maybe_coro):
+                    await maybe_coro
+            except Exception as e:
+                logger.exception(f"[Bus] on_complete callback failed: {e}")
+
+        if completion_fut and not completion_fut.done():
+            completion_fut.set_result({"event": event, "handlers": handler_count})
