@@ -38,5 +38,7 @@
 
     基类定义在plugin_base.py中
     子类定义在对应的插件.py中
-    
+260122
+    light.py新增brightness属性，新添、修改相应函数代码,light是新的，light_old是原本的
+    增加esp8266芯片硬件通信
 
